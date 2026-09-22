@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,110 +47,274 @@ class _LoginScreenState extends State<LoginScreen> {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
+      backgroundColor: const Color(0xFF121214),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Icon(Icons.car_repair_rounded, size: 72, color: Color(0xFF1E3A8A)),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Car Garage Management System',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1E3A8A)),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Sign in to access your garage portal',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 32),
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Email Address',
-                      prefixIcon: Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 12),
+                // Vroom Branding Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFC700),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.directions_car, color: Color(0xFF121214), size: 24),
                     ),
-                    validator: (v) => (v == null || v.isEmpty) ? 'Enter email' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    const SizedBox(width: 10),
+                    const Text(
+                      'VROOM GARAGE',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.5,
+                        color: Colors.white,
                       ),
-                      border: const OutlineInputBorder(),
                     ),
-                    validator: (v) => (v == null || v.isEmpty) ? 'Enter password' : null,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: authProvider.isLoading ? null : _submit,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: const Color(0xFF1E3A8A),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ],
+                ),
+
+                const SizedBox(height: 28),
+
+                // Hero Graphic Card with Uploaded Supercar Banner
+                Container(
+                  height: 190,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    image: const DecorationImage(
+                      image: AssetImage('assets/images/banner_car.png'),
+                      fit: BoxFit.cover,
                     ),
-                    child: authProvider.isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                          )
-                        : const Text('SIGN IN', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ),
-                  const SizedBox(height: 32),
-                  const Divider(),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Demo Account Quick Fill:',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      ActionChip(
-                        avatar: const Icon(Icons.admin_panel_settings, size: 16),
-                        label: const Text('Admin'),
-                        onPressed: () => _quickFill('admin@garage.com', 'admin123'),
-                      ),
-                      ActionChip(
-                        avatar: const Icon(Icons.receipt_long, size: 16),
-                        label: const Text('Receptionist'),
-                        onPressed: () => _quickFill('receptionist@garage.com', 'rec123'),
-                      ),
-                      ActionChip(
-                        avatar: const Icon(Icons.build, size: 16),
-                        label: const Text('Mechanic'),
-                        onPressed: () => _quickFill('mechanic1@garage.com', 'mech123'),
-                      ),
-                      ActionChip(
-                        avatar: const Icon(Icons.person, size: 16),
-                        label: const Text('Customer'),
-                        onPressed: () => _quickFill('customer1@example.com', 'cust123'),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
-                ],
-              ),
+                  child: Stack(
+                    children: [
+                      // Gradient Dark Overlay for optimal text legibility
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.black.withValues(alpha: 0.85),
+                              Colors.black.withValues(alpha: 0.45),
+                              Colors.transparent,
+                            ],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.all(24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Need a Service?\nWe\'ve Got You Covered!',
+                              style: TextStyle(
+                                fontSize: 21,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                height: 1.3,
+                                shadows: [
+                                  Shadow(color: Colors.black, blurRadius: 8),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Whether it\'s routine maintenance or full repairs, manage your vehicle effortlessly.',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white70,
+                                shadows: [
+                                  Shadow(color: Colors.black, blurRadius: 6),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                // Inputs
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: 'Email Address',
+                    labelStyle: const TextStyle(color: Colors.white70),
+                    prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFFFFC700)),
+                    filled: true,
+                    fillColor: const Color(0xFF18181B),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.shade800),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFFFC700), width: 1.5),
+                    ),
+                  ),
+                  validator: (v) => (v == null || v.isEmpty) ? 'Enter email' : null,
+                ),
+
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    labelStyle: const TextStyle(color: Colors.white70),
+                    prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFFFFC700)),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off, color: Colors.white54),
+                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFF18181B),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.grey.shade800),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Color(0xFFFFC700), width: 1.5),
+                    ),
+                  ),
+                  validator: (v) => (v == null || v.isEmpty) ? 'Enter password' : null,
+                ),
+
+                const SizedBox(height: 28),
+
+                // Submit Pill Button
+                SizedBox(
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: authProvider.isLoading ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFFC700),
+                      foregroundColor: const Color(0xFF121214),
+                      elevation: 4,
+                      shadowColor: const Color(0xFFFFC700).withValues(alpha: 0.3),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    ),
+                    child: authProvider.isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(color: Color(0xFF121214), strokeWidth: 2.5),
+                          )
+                        : const Text(
+                            'Get Started',
+                            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                          ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Register Link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Don't have a customer account? ", style: TextStyle(color: Colors.white70, fontSize: 13)),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                        );
+                      },
+                      child: const Text(
+                        'Register Now',
+                        style: TextStyle(color: Color(0xFFFFC700), fontWeight: FontWeight.bold, fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 28),
+
+                // Demo Accounts
+                const Center(
+                  child: Text(
+                    'Select Demo Role to Quick Fill',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.white54),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildRoleChip('Admin', 'admin@garage.com', 'admin123', Icons.admin_panel_settings),
+                    _buildRoleChip('Receptionist', 'receptionist@garage.com', 'rec123', Icons.receipt_long),
+                    _buildRoleChip('Mechanic', 'mechanic1@garage.com', 'mech123', Icons.build),
+                    _buildRoleChip('Customer', 'customer1@example.com', 'cust123', Icons.person),
+                  ],
+                ),
+              ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoleChip(String label, String email, String password, IconData icon) {
+    final isSelected = _emailController.text == email;
+    return GestureDetector(
+      onTap: () => _quickFill(email, password),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFFFC700) : const Color(0xFF18181B),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? const Color(0xFFFFC700) : Colors.grey.shade800,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: isSelected ? const Color(0xFF121214) : Colors.white70),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: isSelected ? const Color(0xFF121214) : Colors.white70,
+              ),
+            ),
+          ],
         ),
       ),
     );
