@@ -90,9 +90,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    image: const DecorationImage(
-                      image: AssetImage('assets/images/banner_car.png'),
+                    image: DecorationImage(
+                      image: const AssetImage('assets/images/need_service_banner.jpg'),
                       fit: BoxFit.cover,
+                      onError: (exception, stackTrace) {},
                     ),
                     boxShadow: [
                       BoxShadow(

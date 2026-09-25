@@ -130,4 +130,48 @@ class BookingProvider extends ChangeNotifier {
     notifyListeners();
     return false;
   }
+
+  Future<bool> addVehicle({
+    required String plateNumber,
+    required String brand,
+    required String model,
+    required int year,
+    required String color,
+    required int mileage,
+    String? vin,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiClient.dio.post(
+        ApiConstants.vehicles,
+        data: {
+          'plate_number': plateNumber,
+          'brand': brand,
+          'model': model,
+          'year': year,
+          'color': color,
+          'mileage': mileage,
+          if (vin != null && vin.isNotEmpty) 'vin': vin,
+        },
+      );
+
+      if (response.statusCode == 201) {
+        await fetchVehiclesAndServices();
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+    } on DioException catch (e) {
+      _errorMessage = e.response?.data?.toString() ?? 'Failed to add vehicle.';
+    } catch (e) {
+      _errorMessage = 'An error occurred while adding vehicle.';
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return false;
+  }
 }

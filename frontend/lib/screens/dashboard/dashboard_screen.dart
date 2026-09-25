@@ -57,17 +57,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const CreateBookingScreen()),
-          ).then((_) => _refreshData());
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('New Booking'),
-        backgroundColor: const Color(0xFF1E3A8A),
-        foregroundColor: Colors.white,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 96.0),
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CreateBookingScreen()),
+            ).then((_) => _refreshData());
+          },
+          icon: const Icon(Icons.add),
+          label: const Text('New Booking'),
+          backgroundColor: const Color(0xFF1E3A8A),
+          foregroundColor: Colors.white,
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: _refreshData,

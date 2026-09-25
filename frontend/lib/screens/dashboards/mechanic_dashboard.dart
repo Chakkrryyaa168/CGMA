@@ -205,6 +205,7 @@ class _MechanicDashboardState extends State<MechanicDashboard> {
                   },
                 ),
               ],
+              const SizedBox(height: 180),
             ],
           ),
         ),

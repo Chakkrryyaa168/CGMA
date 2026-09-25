@@ -64,10 +64,10 @@ class _RepairJobDetailScreenState extends State<RepairJobDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Vehicle & Check-In Header Card
+            // 1. Vehicle & Check-In Header Card (Vehicle Inspection Details)
             Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 3,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -76,13 +76,39 @@ class _RepairJobDetailScreenState extends State<RepairJobDetailScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          job.vehicle?.displayName ?? 'Vehicle #${job.vehicle?.id}',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        Expanded(
+                          child: Text(
+                            job.vehicle?.displayName ?? 'Vehicle #${job.vehicle?.id}',
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF121214)),
+                          ),
                         ),
-                        Chip(
-                          label: Text(job.status, style: const TextStyle(color: Colors.white, fontSize: 12)),
-                          backgroundColor: _getStatusColor(job.status),
+                        // Quick Status Update Selector Dropdown
+                        DropdownButtonHideUnderline(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: _getStatusColor(job.status),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: DropdownButton<String>(
+                              value: ['PENDING', 'IN_PROGRESS', 'WAITING_FOR_PARTS', 'COMPLETED'].contains(job.status) ? job.status : 'IN_PROGRESS',
+                              dropdownColor: const Color(0xFF18181B),
+                              icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                              items: const [
+                                DropdownMenuItem(value: 'PENDING', child: Text('PENDING', style: TextStyle(color: Colors.white))),
+                                DropdownMenuItem(value: 'IN_PROGRESS', child: Text('IN PROGRESS', style: TextStyle(color: Colors.white))),
+                                DropdownMenuItem(value: 'WAITING_FOR_PARTS', child: Text('WAITING FOR PARTS', style: TextStyle(color: Colors.white))),
+                                DropdownMenuItem(value: 'COMPLETED', child: Text('COMPLETED', style: TextStyle(color: Colors.white))),
+                              ],
+                              onChanged: (newStatus) async {
+                                if (newStatus != null && newStatus != job.status) {
+                                  await rProvider.updateJobStatus(job.id, newStatus);
+                                  _loadData();
+                                }
+                              },
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -90,15 +116,32 @@ class _RepairJobDetailScreenState extends State<RepairJobDetailScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildDetailItem('Check-In Mileage', '${job.checkInMileage} km'),
-                        _buildDetailItem('Fuel Level', job.fuelLevel),
-                        _buildDetailItem('Assignment', job.assignmentStatus),
+                        _buildDetailItem('Odometer Mileage', '${job.checkInMileage} km'),
+                        _buildDetailItem('Fuel Gauge', job.fuelLevel),
+                        _buildDetailItem('Assigned Tech', job.mechanic?.displayName ?? 'Unassigned'),
                       ],
                     ),
-                    if (job.vehicleCondition.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      Text('Condition: ${job.vehicleCondition}', style: TextStyle(color: Colors.grey.shade700, fontSize: 13)),
-                    ],
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.search, size: 18, color: Colors.grey),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Body Inspection: ${job.vehicleCondition.isNotEmpty ? job.vehicleCondition : "No visible scratches/scuffs"}',
+                              style: TextStyle(color: Colors.grey.shade800, fontSize: 12, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -111,9 +154,9 @@ class _RepairJobDetailScreenState extends State<RepairJobDetailScreen> {
             const SizedBox(height: 12),
             _buildTimeline(job.status),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-            // 3. Mechanic Assignment Card
+            // Mechanic Assignment Card
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(14.0),
@@ -122,7 +165,7 @@ class _RepairJobDetailScreenState extends State<RepairJobDetailScreen> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.engineering, color: Color(0xFF1E3A8A)),
+                        const Icon(Icons.engineering, color: Color(0xFF18181B)),
                         const SizedBox(width: 12),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,13 +191,51 @@ class _RepairJobDetailScreenState extends State<RepairJobDetailScreen> {
 
             const SizedBox(height: 20),
 
+            // 3. Technician Repair Notes Card
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              child: Padding(
+                padding: const EdgeInsets.all(14.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(Icons.edit_note, color: Color(0xFF18181B)),
+                            SizedBox(width: 8),
+                            Text('Technician Repair Notes', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        TextButton.icon(
+                          onPressed: () => _showEditRepairNoteDialog(job, rProvider),
+                          icon: const Icon(Icons.edit, size: 16),
+                          label: Text(job.repairNote.isEmpty ? 'Add Note' : 'Edit'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      job.repairNote.isNotEmpty ? job.repairNote : 'No repair notes logged by technician yet.',
+                      style: TextStyle(fontSize: 13, color: job.repairNote.isNotEmpty ? Colors.black87 : Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
             // 4. Diagnoses Section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Diagnoses & Inspection', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const Text('Diagnoses & Vehicle Inspection', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 IconButton(
-                  icon: const Icon(Icons.add_circle_outline, color: Color(0xFF1E3A8A)),
+                  icon: const Icon(Icons.add_circle_outline, color: Color(0xFF18181B)),
                   onPressed: () => _showAddDiagnosisDialog(job.id, rProvider),
                 ),
               ],
@@ -176,9 +257,9 @@ class _RepairJobDetailScreenState extends State<RepairJobDetailScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Spare Parts Used', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const Text('Spare Parts Used / Required', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 IconButton(
-                  icon: const Icon(Icons.playlist_add, color: Color(0xFF1E3A8A)),
+                  icon: const Icon(Icons.playlist_add, color: Color(0xFF18181B)),
                   onPressed: () => _showAddPartUsageDialog(job.id, rProvider, iProvider),
                 ),
               ],
@@ -197,11 +278,11 @@ class _RepairJobDetailScreenState extends State<RepairJobDetailScreen> {
 
             const SizedBox(height: 32),
 
-            // Action Buttons Row
+            // Action Buttons Row (Generate Invoice & Complete / Handover to Receptionist)
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton.icon(
+                  child: OutlinedButton.icon(
                     onPressed: () async {
                       final nav = Navigator.of(context);
                       final success = await rProvider.generateInvoice(job.id);
@@ -214,12 +295,11 @@ class _RepairJobDetailScreenState extends State<RepairJobDetailScreen> {
                         if (mounted) _loadData();
                       });
                     },
-                    icon: const Icon(Icons.receipt),
-                    label: const Text('INVOICE / BILL'),
-                    style: ElevatedButton.styleFrom(
+                    icon: const Icon(Icons.receipt, color: Color(0xFF18181B)),
+                    label: const Text('INVOICE', style: TextStyle(color: Color(0xFF18181B), fontWeight: FontWeight.bold)),
+                    style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      backgroundColor: Colors.amber.shade800,
-                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Color(0xFF18181B)),
                     ),
                   ),
                 ),
@@ -233,16 +313,19 @@ class _RepairJobDetailScreenState extends State<RepairJobDetailScreen> {
                             final ok = await rProvider.completeJob(job.id);
                             if (!mounted || !ok) return;
                             messenger.showSnackBar(
-                              const SnackBar(content: Text('Repair Job completed & Service History recorded!'), backgroundColor: Colors.green),
+                              const SnackBar(
+                                content: Text('Job Completed! Forwarded to Receptionist for customer notification & billing.'),
+                                backgroundColor: Colors.green,
+                              ),
                             );
                             _loadData();
                           },
                     icon: const Icon(Icons.check_circle),
-                    label: const Text('COMPLETE JOB'),
+                    label: const Text('COMPLETE & SEND TO DESK', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
+                      backgroundColor: const Color(0xFFFFC700),
+                      foregroundColor: const Color(0xFF121214),
                     ),
                   ),
                 ),
@@ -313,6 +396,43 @@ class _RepairJobDetailScreenState extends State<RepairJobDetailScreen> {
       case 'WAITING_FOR_PARTS': return Colors.amber;
       default: return Colors.orange;
     }
+  }
+
+  void _showEditRepairNoteDialog(RepairJobModel job, RepairJobProvider rProvider) {
+    final noteCtrl = TextEditingController(text: job.repairNote);
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Technician Repair Note', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: TextField(
+            controller: noteCtrl,
+            maxLines: 4,
+            decoration: const InputDecoration(
+              hintText: 'Enter technical repair notes, work done, or observations...',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFFC700),
+                foregroundColor: const Color(0xFF121214),
+              ),
+              onPressed: () async {
+                final ok = await rProvider.updateRepairNote(job.id, noteCtrl.text.trim());
+                if (ctx.mounted) Navigator.pop(ctx);
+                if (ok) _loadData();
+              },
+              child: const Text('Save Note', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showAssignMechanicDialog(RepairJobModel job, RepairJobProvider rProvider) {

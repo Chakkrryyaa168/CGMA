@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../dashboards/customer_dashboard.dart';
 import '../booking/create_booking_screen.dart';
 import '../profile/profile_screen.dart';
+import '../../widgets/cool_circular_nav_bar.dart';
 
 class CustomerShell extends StatefulWidget {
   const CustomerShell({super.key});
@@ -22,27 +23,28 @@ class _CustomerShellState extends State<CustomerShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
       ),
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: CoolCircularNavBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) => setState(() => _currentIndex = index),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.directions_car_outlined),
-            selectedIcon: Icon(Icons.directions_car, color: Color(0xFF121214)),
-            label: 'My Garage',
+        items: const [
+          AnimatedNavItem(
+            icon: Icons.directions_car_outlined,
+            selectedIcon: Icons.directions_car,
+            label: 'Garage',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.calendar_month_outlined),
-            selectedIcon: Icon(Icons.calendar_month, color: Color(0xFF121214)),
-            label: 'Book Service',
+          AnimatedNavItem(
+            icon: Icons.calendar_month_outlined,
+            selectedIcon: Icons.calendar_month,
+            label: 'Book',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person, color: Color(0xFF121214)),
+          AnimatedNavItem(
+            icon: Icons.person_outline,
+            selectedIcon: Icons.person,
             label: 'Profile',
           ),
         ],

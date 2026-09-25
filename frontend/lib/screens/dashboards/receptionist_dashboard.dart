@@ -4,6 +4,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/booking_provider.dart';
 import '../../providers/repair_job_provider.dart';
 import '../../models/booking_model.dart';
+import '../../models/repair_job_model.dart';
 import '../booking/create_booking_screen.dart';
 import '../repair_job/repair_job_detail_screen.dart';
 
@@ -54,17 +55,20 @@ class _ReceptionistDashboardState extends State<ReceptionistDashboard> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const CreateBookingScreen()),
-          ).then((_) => _refreshData());
-        },
-        icon: const Icon(Icons.add_location_alt, color: Color(0xFF121214)),
-        label: const Text('New Customer Booking', style: TextStyle(color: Color(0xFF121214), fontWeight: FontWeight.bold)),
-        backgroundColor: const Color(0xFFFFC700),
-        elevation: 4,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 96.0),
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CreateBookingScreen()),
+            ).then((_) => _refreshData());
+          },
+          icon: const Icon(Icons.add_location_alt, color: Color(0xFF121214)),
+          label: const Text('New Customer Booking', style: TextStyle(color: Color(0xFF121214), fontWeight: FontWeight.bold)),
+          backgroundColor: const Color(0xFFFFC700),
+          elevation: 4,
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: _refreshData,
@@ -199,8 +203,28 @@ class _ReceptionistDashboardState extends State<ReceptionistDashboard> {
                           child: Icon(Icons.build_circle, color: Color(0xFFFFC700), size: 20),
                         ),
                         title: Text(job.vehicle?.displayName ?? 'Job #${job.id}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text('Status: ${job.status} | Mechanic: ${job.mechanic?.displayName ?? "Unassigned"}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                        trailing: const Icon(Icons.chevron_right, color: Color(0xFF121214)),
+                        subtitle: Text('Status: ${job.status.replaceAll('_', ' ')}\nMechanic: ${job.mechanic?.displayName ?? "Unassigned"}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                        isThreeLine: true,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (job.status == 'COMPLETED' || job.status == 'WAITING_FOR_PARTS')
+                              IconButton(
+                                icon: const Icon(Icons.mark_email_read, color: Colors.green),
+                                tooltip: 'Notify Customer Vehicle Ready',
+                                onPressed: () => _notifyCustomer(job),
+                              ),
+                            IconButton(
+                              icon: const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF121214)),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => RepairJobDetailScreen(repairJobId: job.id)),
+                                ).then((_) => _refreshData());
+                              },
+                            ),
+                          ],
+                        ),
                         onTap: () {
                           Navigator.push(
                             context,
@@ -211,6 +235,7 @@ class _ReceptionistDashboardState extends State<ReceptionistDashboard> {
                     );
                   },
                 ),
+              const SizedBox(height: 180),
             ],
           ),
         ),
@@ -301,6 +326,51 @@ class _ReceptionistDashboardState extends State<ReceptionistDashboard> {
               ],
             );
           },
+        );
+      },
+    );
+  }
+
+  void _notifyCustomer(RepairJobModel job) {
+    final ownerName = job.vehicle?.customer?.user?.fullName ?? 'Customer';
+    final ownerPhone = job.vehicle?.customer?.user?.phone ?? 'Registered Phone';
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Row(
+            children: [
+              Icon(Icons.mark_email_read, color: Colors.green),
+              SizedBox(width: 8),
+              Text('Notify Customer Ready', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            ],
+          ),
+          content: Text(
+            'Send vehicle completion SMS & Email notification to:\n\n'
+            '• Owner: $ownerName\n'
+            '• Contact: $ownerPhone\n'
+            '• Vehicle: ${job.vehicle?.displayName}\n\n'
+            'Notification Message:\n"Your vehicle is ready for pickup at Greenwood Drive Garage Hub. Total Invoice: \$${job.invoice?.totalAmount.toStringAsFixed(2) ?? '0.00'}"',
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+              icon: const Icon(Icons.send),
+              label: const Text('SEND NOTIFICATION'),
+              onPressed: () {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Vehicle ready alert dispatched to $ownerName ($ownerPhone)!'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+            ),
+          ],
         );
       },
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../dashboards/admin_dashboard.dart';
 import '../customer_vehicle/customer_vehicle_screen.dart';
 import '../profile/profile_screen.dart';
+import '../../widgets/cool_circular_nav_bar.dart';
 
 class AdminShell extends StatefulWidget {
   const AdminShell({super.key});
@@ -22,27 +23,28 @@ class _AdminShellState extends State<AdminShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
       ),
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: CoolCircularNavBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) => setState(() => _currentIndex = index),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.admin_panel_settings_outlined),
-            selectedIcon: Icon(Icons.admin_panel_settings, color: Color(0xFF121214)),
-            label: 'Admin Control',
+        items: const [
+          AnimatedNavItem(
+            icon: Icons.admin_panel_settings_outlined,
+            selectedIcon: Icons.admin_panel_settings,
+            label: 'Admin',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.people_outline),
-            selectedIcon: Icon(Icons.people, color: Color(0xFF121214)),
-            label: 'Customers',
+          AnimatedNavItem(
+            icon: Icons.people_outline,
+            selectedIcon: Icons.people,
+            label: 'Clients',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person, color: Color(0xFF121214)),
+          AnimatedNavItem(
+            icon: Icons.person_outline,
+            selectedIcon: Icons.person,
             label: 'Profile',
           ),
         ],

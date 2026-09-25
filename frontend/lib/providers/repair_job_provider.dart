@@ -107,6 +107,38 @@ class RepairJobProvider extends ChangeNotifier {
     return false;
   }
 
+  Future<bool> updateJobStatus(int repairJobId, String status) async {
+    try {
+      final response = await _apiClient.dio.patch(
+        '${ApiConstants.repairJobs}$repairJobId/',
+        data: {'status': status},
+      );
+      if (response.statusCode == 200) {
+        await fetchRepairJobs();
+        return true;
+      }
+    } catch (e) {
+      _errorMessage = 'Failed to update job status.';
+    }
+    return false;
+  }
+
+  Future<bool> updateRepairNote(int repairJobId, String note) async {
+    try {
+      final response = await _apiClient.dio.patch(
+        '${ApiConstants.repairJobs}$repairJobId/',
+        data: {'repair_note': note},
+      );
+      if (response.statusCode == 200) {
+        await fetchRepairJobs();
+        return true;
+      }
+    } catch (e) {
+      _errorMessage = 'Failed to update repair note.';
+    }
+    return false;
+  }
+
   Future<bool> completeJob(int repairJobId) async {
     try {
       final response = await _apiClient.dio.post('${ApiConstants.repairJobs}$repairJobId/complete_job/');
